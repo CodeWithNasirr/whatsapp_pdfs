@@ -1,0 +1,78 @@
+--------- Starting game with Launcher Debug!
+Info: Launcher version: hebe-20251017-[dd44b8a]-v3_openjdk
+Info: Architecture: arm64
+Info: Device model: vivo V2307
+Info: API version: 35
+Info: Selected Minecraft version: fabric-loader-0.18.4-1.21.11
+Info: Custom Java arguments: ""
+Info: RAM allocated: 3976 Mb
+Info: Graphics device: Qualcomm Adreno (TM) 619 (OpenGL ES 3)
+Added custom env: MOJO_RENDERER=vulkan_zink
+Added custom env: FORCE_VSYNC=true
+Added custom env: POJAV_BIG_CORE_AFFINITY=1
+Added custom env: LIBGL_MIPMAP=3
+Added custom env: allow_higher_compat_version=true
+Added custom env: MESA_GLSL_CACHE_DIR=/data/user/0/git.artdeell.mojo/cache
+Added custom env: LIBGL_NOINTOVLHACK=1
+Added custom env: force_glsl_extensions_warn=true
+Added custom env: LIBGL_NORMALIZE=1
+Added custom env: LIBGL_VGPU_DUMP=1
+Added custom env: POJAV_VSYNC_IN_ZINK=1
+Added custom env: LIBGL_NOERROR=1
+Added custom env: LIBGL_ES=2
+Added custom env: MESA_GLSL_VERSION_OVERRIDE=460
+Added custom env: allow_glsl_extension_directive_midshader=true
+[0.960s][warning][jni,resolve] Re-registering of platform native method: jdk.internal.loader.NativeLibraries.load(Ljdk/internal/loader/NativeLibraries$NativeLibraryImpl;Ljava/lang/String;ZZ)Z from code in a different classloader
+2026-03-05T19:09:15.021309106Z main ERROR appender Console has no parameter that matches element Policies
+[00:39:15] [main/INFO]: Loading Minecraft 1.21.11 with Fabric Loader 0.18.4
+[00:39:15] [main/INFO]: Loading 4 mods:
+	- fabricloader 0.18.4
+	   \-- mixinextras 0.5.0
+	- java 21
+	- minecraft 1.21.11
+[00:39:15] [main/INFO]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=file:/storage/emulated/0/Android/data/git.artdeell.mojo/files/.minecraft/libraries/net/fabricmc/sponge-mixin/0.17.0+mixin.0.8.7/sponge-mixin-0.17.0+mixin.0.8.7.jar Service=Knot/Fabric Env=CLIENT
+[00:39:19] [main/WARN]: Did not find udev library in operating system. Some features may not work.
+[00:39:20] [main/WARN]: File not found or not readable: /proc/stat
+[00:39:21] [Datafixer Bootstrap/INFO]: 287 Datafixer optimizations took 2514 milliseconds
+[00:39:35] [Render thread/INFO]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, profilesHost=https://api.mojang.com, name=PROD]
+[00:39:35] [Render thread/INFO]: Setting user: pixxy6
+Registered forkAndExec
+[00:39:36] [Render thread/INFO]: [STDERR]: [LWJGL] [ERROR] Incompatible Java and native library versions detected.
+Possible reasons:
+	a) -Djava.library.path is set to a folder containing shared libraries of an older LWJGL version.
+	b) The classpath contains jar files of an older LWJGL version.
+Possible solutions:
+	a) Make sure to not set -Djava.library.path (it is not needed for developing with LWJGL 3) or make
+	   sure the folder it points to contains the shared libraries of the correct LWJGL version.
+	b) Check the classpath and make sure to only have jar files of the same LWJGL version in it.
+[LWJGL] Failed to load a library. Possible solutions:
+	a) Add the directory that contains the shared library to -Djava.library.path or -Dorg.lwjgl.librarypath.
+	b) Add the JAR that contains the shared library to the classpath.
+[LWJGL] Enable debug mode with -Dorg.lwjgl.util.Debug=true for better diagnostics.
+[LWJGL] Enable the SharedLibraryLoader debug mode with -Dorg.lwjgl.util.DebugLoader=true for better diagnostics.
+[00:39:36] [Render thread/ERROR]: Error parsing option value off for option Fullscreen: Not a boolean: "off"
+[00:39:36] [Render thread/INFO]: Backend library: LWJGL version 3.3.3-snapshot
+[00:39:36] [Render thread/WARN]: Detected unexpected shutdown during last game startup: resetting fullscreen mode
+OSMDroid: loading vulkan regularly...
+OSMDroid: loaded vulkan, ptr=0xaae4fa236dc0e25b
+#
+# A fatal error has been detected by the Java Runtime Environment:
+#
+#  SIGSEGV (0xb) at pc=0x0000006c65c81ca4, pid=21012, tid=21272
+#
+# JRE version: OpenJDK Runtime Environment (21.0.1) (build 21.0.1-internal-adhoc.runner.openjdk-21)
+# Java VM: OpenJDK 64-Bit Server VM (21.0.1-internal-adhoc.runner.openjdk-21, mixed mode, tiered, compressed oops, compressed class ptrs, g1 gc, linux-aarch64)
+# Problematic frame:
+# C  [libOSMesa.so+0x905ca4]
+#
+# Core dump will be written. Default location: core.21012 (may not exist)
+#
+# An error report file with more information is saved as:
+# /storage/emulated/0/Android/data/git.artdeell.mojo/files/instances/fabric-loader-0.18.4-1.21.11-dce0ab22-65b6-4f88-bf06-1771e836705c/hs_err_pid21012.log
+[thread 21380 also had an error]
+#
+# If you would like to submit a bug report, please visit:
+#   https://bugreport.java.com/bugreport/crash.jsp
+# The crash happened outside the Java Virtual Machine in native code.
+# See problematic frame for where to report the bug.
+#
