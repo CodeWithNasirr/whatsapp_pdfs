@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GTA 5 Style Open World Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            border: 2px solid #333;
+            box-shadow: 0 0 20px rgba(255,0,0,0.5);
+        }
+        .controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas" width="1200" height="700"></canvas>
+    <div class="controls">
+        <h3>🎮 GTA Style Open World</h3>
+        <p><strong>WASD</strong> - Drive Car</p>
+        <p><strong>Mouse</strong> - Look Around</p>
+        <p><strong>SPACE</strong> - Brake</p>
+        <p><strong>R</strong> - Reset Position</p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Game State
+        const game = {
+            camera: { x: 0, y: 0, z: 100, angle: 0 },
+            car: { x: 0, y: 0, z: 5, speed: 0, angle: 0, velX: 0, velY: 0 },
+            keys: {},
+            mouseX: 0,
+            time: 0
+        };
+
+        // World Generation
+        const world = {
+            buildings: [],
+            roads: [],
+            trees: []
+        };
+
+        // Generate Open World
+        function generateWorld() {
+            world.buildings = [];
+            world.roads = [];
+            world.trees = [];
+
+            // Roads (Grid system)
+            for (let x = -200; x <= 200; x += 40) {
+                world.roads.push({ x1: x, y1: -200, x2: x, y2: 200, type: 'vertical' });
+            }
+            for (let y = -200; y <= 200; y += 40) {
+                world.roads.push({ x1: -200, y1: y, x2: 200, y2: y, type: 'horizontal' });
+            }
+
+            // Buildings
+            for (let i = 0; i < 150; i++) {
+                const x = (Math.random() - 0.5) * 800;
+                const y = (Math.random() - 0.5) * 800;
+                const size = 8 + Math.random() * 15;
+                const height = 20 + Math.random() * 60;
+                world.buildings.push({ x, y, width: size, height });
+            }
+
+            // Trees
+            for (let i = 0; i < 80; i++) {
+                const x = (Math.random() - 0.5) * 800;
+                const y = (Math.random() - 0.5) * 800;
+                world.trees.push({ x, y, size: 3 + Math.random() * 4 });
+            }
+        }
+
+        // 3D Projection
+        function project3D(worldX, worldY, worldZ) {
+            const relX = worldX - game.camera.x;
+            const relY = worldY - game.camera.y;
+            const relZ = worldZ - game.camera.z;
+
+            const cosA = Math.cos(game.camera.angle);
+            const sinA = Math.sin(game.camera.angle);
+
+            const rotX = relX * cosA - relY * sinA;
+            const rotY = relX * sinA + relY * cosA;
+
+            const perspective = 300 / (300 + relZ);
+            const screenX = canvas.width / 2 + rotX * perspective * 100;
+            const screenY = canvas.height / 2 - rotY * perspective * 100 - worldZ * 0.5;
+
+            return { x: screenX, y: screenY, scale: perspective };
+        }
+
+        // Car Physics
+        function updateCar() {
+            const accel = 0.3;
+            const friction = 0.92;
+            const maxSpeed = 8;
+
+            if (game.keys['w'] || game.keys['W']) {
+                game.car.velX += Math.cos(game.car.angle) * accel;
+                game.car.velY += Math.sin(game.car.angle) * accel;
+            }
+            if (game.keys['s'] || game.keys['S']) {
+                game.car.velX -= Math.cos(game.car.angle) * accel * 0.5;
+                game.car.velY -= Math.sin(game.car.angle) * accel * 0.5;
+            }
+            if (game.keys['a'] || game.keys['A']) {
+                game.car.angle -= 0.05;
+            }
+            if (game.keys['d'] || game.keys['D']) {
+                game.car.angle += 0.05;
+            }
+            if (game.keys[' ']) {
+                game.car.velX *= 0.85;
+                game.car.velY *= 0.85;
+            }
+
+            // Speed limit & friction
+            const speed = Math.sqrt(game.car.velX * game.car.velX + game.car.velY * game.car.velY);
+            if (speed > maxSpeed) {
+                game.car.velX = (game.car.velX / speed) * maxSpeed;
+                game.car.velY = (game.car.velY / speed) * maxSpeed;
+            }
+
+            game.car.velX *= friction;
+            game.car.velY *= friction;
+
+            game.car.x += game.car.velX;
+            game.car.y += game.car.velY;
+
+            // Camera follows car
+            game.camera.x += (game.car.x - game.camera.x) * 0.1;
+            game.camera.y += (game.car.y - game.camera.y) * 0.1;
+            game.camera.angle = game.car.angle + Math.PI;
+        }
+
+        // Render World
+        function render() {
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Sky gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#16213e');
+            gradient.addColorStop(0.5, '#0f3460');
+            gradient.addColorStop(1, '#533a7b');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height * 0.4);
+
+            // Roads
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 4;
+            world.roads.forEach(road => {
+                const p1 = project3D(road.x1, road.y1, 0);
+                const p2 = project3D(road.x2, road.y2, 0);
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.stroke();
+
+                // Road lines
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([10, 10]);
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.strokeStyle = '#333';
+            });
+
+            // Trees
+            world.trees.forEach(tree => {
+                const proj = project3D(tree.x, tree.y, 2);
+                ctx.fillStyle = '#2d5016';
+                ctx.beginPath();
+                ctx.arc(proj.x, proj.y, tree.size * proj.scale * 20, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#1a3a0f';
+                ctx.beginPath();
+                ctx.arc(proj.x, proj.y - 5 * proj.scale, tree.size * proj.scale * 8, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Buildings
+            world.buildings.forEach(building => {
+                const base = project3D(building.x, building.y, 0);
+                const top = project3D(building.x, building.y, building.height);
+
+                // Building sides
+                ctx.fillStyle = '#4a5568';
+                ctx.fillRect(base.x - building.width * base.scale * 10, base.y, 
+                           building.width * base.scale * 20, top.y - base.y);
+
+                // Windows
+                for (let i = 0; i < 8; i++) {
+                    if (Math.random() > 0.3) {
+                        ctx.fillStyle = '#ff6b35';
+                        ctx.fillRect(base.x - 2 + i * 4 * base.scale, base.y + 10 * i * base.scale, 
+                                   3 * base.scale, 3 * base.scale);
+                    }
+                }
+
+                // Roof
+                ctx.fillStyle = '#2d3748';
+                ctx.fillRect(base.x - building.width * base.scale * 12, top.y, 
+                           building.width * base.scale * 24, 8 * top.scale);
+            });
+
+            // Car (Sports Car)
+            const carProj = project3D(game.car.x, game.car.y, game.car.z);
+            const carWidth = 12 * carProj.scale;
+            const carHeight = 6 * carProj.scale;
+
+            // Car body
+            const carGradient = ctx.createLinearGradient(0, carProj.y - carHeight, 0, carProj.y);
+            carGradient.addColorStop(0, '#e53e3e');
+            carGradient.addColorStop(1, '#c53030');
+            ctx.fillStyle = carGradient;
+            ctx.fillRect(carProj.x - carWidth/2, carProj.y - carHeight, carWidth, carHeight);
+
+            // Windows
+            ctx.fillStyle = '#1a202c';
+            ctx.fillRect(carProj.x - carWidth/3, carProj.y - carHeight + 2 * carProj.scale, 
+                        carWidth/1.5, carHeight * 0.4);
+
+            // Wheels
+            ctx.fillStyle = '#2d3748';
+            const wheelSize = 2 * carProj.scale;
+            ctx.beginPath();
+            ctx.arc(carProj.x - carWidth/3, carProj.y + 1 * carProj.scale, wheelSize, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(carProj.x + carWidth/3, carProj.y + 1 * carProj.scale, wheelSize, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Speedometer
+            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            ctx.beginPath();
+            ctx.arc(100, 80, 60, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            const speed = Math.sqrt(game.car.velX * game.car.velX + game.car.velY * game.car.velY) * 20;
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(Math.floor(speed) + ' KM/H', 100, 90);
+
+            ctx.textAlign = 'left';
+            ctx.fillText('Position: ' + Math.floor(game.car.x) + ', ' + Math.floor(game.car.y), 10, canvas.height - 40);
+        }
+
+        // Input Handling
+        document.addEventListener('keydown', (e) => {
+            game.keys[e.key] = true;
+            if (e.key.toLowerCase() === 'r') {
+                game.car.x = 0;
+                game.car.y = 0;
+                game.car.velX = 0;
+                game.car.velY = 0;
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            game.keys[e.key] = false;
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            game.mouseX = (e.clientX - canvas.offsetLeft) / canvas.width * 2 - 1;
+            game.camera.angle += game.mouseX * 0.02;
+        });
+
+        // Game Loop
+        function gameLoop() {
+            game.time++;
+            
+            updateCar();
+            render();
+            
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Initialize
+        generateWorld();
+        gameLoop();
+
+        // Responsive canvas
+        window.addEventListener('resize', () => {
+            canvas.width = Math.min(1200, window.innerWidth - 40);
+            canvas.height = Math.min(700, window.innerHeight - 40);
+        });
+    </script>
+</body>
+</html>
