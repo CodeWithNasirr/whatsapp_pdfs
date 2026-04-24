@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Work From Home – Form Fill Up</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:linear-gradient(135deg,#dfe9f3,#ffffff);
+  padding:10px;
+}
+.container{
+  max-width:420px;
+  margin:auto;
+  background:#fff;
+  padding:20px;
+  border-radius:15px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.15);
+}
+.header{text-align:center;margin-bottom:15px;}
+.header h2{margin:0;color:#2b59ff;}
+.header p{margin:5px 0 0;color:#555;font-size:13px;}
+.note{
+  background:#e8f5e9;
+  color:#1b5e20;
+  padding:10px;
+  border-radius:8px;
+  text-align:center;
+  margin-bottom:15px;
+  font-size:13px;
+  font-weight:bold;
+}
+input,textarea{
+  width:100%;
+  padding:13px;
+  margin-bottom:12px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  font-size:15px;
+}
+.mobile-box{display:flex;margin-bottom:12px;}
+.mobile-box span{
+  width:60px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#f1f1f1;
+  border:1px solid #ccc;
+  border-right:none;
+  border-radius:8px 0 0 8px;
+}
+.mobile-box input{flex:1;border-radius:0 8px 8px 0;}
+button{
+  width:100%;
+  padding:14px;
+  background:#2b59ff;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  font-size:16px;
+  cursor:pointer;
+}
+button.loading{
+  background:#999;
+  cursor:not-allowed;
+}
+.message{
+  margin-top:15px;
+  padding:12px;
+  border-radius:8px;
+  font-size:14px;
+  display:none;
+  text-align:center;
+  font-weight:bold;
+}
+.success{background:#e8f5e9;color:#1b5e20;}
+.error{background:#ffebee;color:#c62828;}
+.footer-text{
+  margin-top:12px;
+  text-align:center;
+  font-size:13px;
+  color:#555;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <h2>Work From Home</h2>
+    <p>Simple Form Fill Up Job</p>
+  </div>
+
+  <div class="note">
+    Students, housewives, professionals & retired people can apply.
+  </div>
+
+  <form id="jobForm">
+    <input type="text" name="Name" placeholder="Full Name" required>
+
+    <div class="mobile-box">
+      <span>+91</span>
+      <input type="tel" id="mobile" name="Mobile"
+      placeholder="10 digit mobile number"
+      maxlength="10" required>
+    </div>
+
+    <input type="text" name="Education"
+    placeholder="Education (10th / 12th / Graduate)" required>
+
+    <textarea name="Address"
+    placeholder="Full Address" required></textarea>
+
+    <button type="submit" id="submitBtn">Submit Details</button>
+  </form>
+
+  <div id="messageBox" class="message"></div>
+
+  <div class="footer-text">
+    Our team will contact shortlisted candidates only.
+  </div>
+
+</div>
+
+<script>
+
+const sheetURL = "https://script.google.com/macros/s/AKfycbxefaezTzQXWbZ9cwYuCzShDTKD7NzF8hSKCAygwn1sO5TB4cuAc7Pq4sHpv5OnTeRJQQ/exec";
+
+const form = document.getElementById("jobForm");
+const messageBox = document.getElementById("messageBox");
+const submitBtn = document.getElementById("submitBtn");
+
+form.addEventListener("submit", function(e){
+  e.preventDefault();
+
+  const mobile = document.getElementById("mobile").value.trim();
+
+  if(!/^[6-9]\d{9}$/.test(mobile)){
+    showMessage("Please enter valid 10-digit Indian mobile number.", "error");
+    return;
+  }
+
+  submitBtn.classList.add("loading");
+  submitBtn.innerText = "Submitting...";
+
+  fetch(sheetURL,{
+    method:"POST",
+    body:new FormData(form)
+  })
+  .then(res=>res.text())
+  .then(result=>{
+
+    if(result==="Duplicate"){
+      showMessage("You have already applied with this number.", "error");
+    }else{
+      showMessage("Applied Successfully! Our team will contact shortlisted candidates.", "success");
+      form.reset();
+    }
+
+    submitBtn.classList.remove("loading");
+    submitBtn.innerText="Submit Details";
+  })
+  .catch(()=>{
+    showMessage("Something went wrong. Please try again.", "error");
+    submitBtn.classList.remove("loading");
+    submitBtn.innerText="Submit Details";
+  });
+});
+
+function showMessage(msg,type){
+  messageBox.style.display="block";
+  messageBox.className="message "+type;
+  messageBox.innerText=msg;
+}
+
+</script>
+
+</body>
+</html>
